@@ -19,6 +19,7 @@ export const paid = (loan: Loan) => loan.payments.reduce((sum, p) => sum + p.amo
 export const remaining = (loan: Loan) => Math.max(0, loan.total - paid(loan))
 export const progress = (loan: Loan) => Math.min(100, Math.round((paid(loan) / loan.total) * 100))
 export const daysLeft = (date: string) => Math.ceil((new Date(date).getTime() - Date.now()) / 86400000)
+export const monthlyPayment = (loan: Loan) => loan.fixedAmount || schedule(loan)[0]?.amount || 0
 export const paymentsLeft = (loan: Loan) => {
   const outstanding = remaining(loan)
   const monthlyPayment = loan.fixedAmount || (loan.payments.length ? loan.payments[loan.payments.length - 1].amount : 0)
