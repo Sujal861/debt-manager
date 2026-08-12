@@ -14,13 +14,7 @@ export type Loan = {
   color: 'blue' | 'orange' | 'violet' | 'red'
 }
 
-export const seedLoans: Loan[] = [
-  { id: 'klarna', lender: 'Klarna', notes: 'Standing desk', borrowed: 680, total: 720, dueDate: '2026-09-02', reminder: '7 days before', payoffMode: 'even', period: 'monthly', payments: [{ id: 'p1', amount: 240, date: '2026-07-02' }], color: 'blue' },
-  { id: 'capital-one', lender: 'Capital One', notes: 'Travel card', borrowed: 2100, total: 2380, dueDate: '2026-10-14', reminder: '14 days before', payoffMode: 'fixed', period: 'monthly', fixedAmount: 290, payments: [{ id: 'p2', amount: 580, date: '2026-07-14' }], color: 'orange' },
-  { id: 'affirm', lender: 'Affirm', notes: 'New camera', borrowed: 1240, total: 1320, dueDate: '2027-01-12', reminder: '3 days before', payoffMode: 'even', period: 'monthly', payments: [{ id: 'p3', amount: 330, date: '2026-06-12' }], color: 'violet' },
-]
-
-export const money = (n: number) => new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', maximumFractionDigits: 0 }).format(n)
+export const money = (n: number) => new Intl.NumberFormat('en-IN', { style: 'currency', currency: 'INR', maximumFractionDigits: 0 }).format(n)
 export const paid = (loan: Loan) => loan.payments.reduce((sum, p) => sum + p.amount, 0)
 export const remaining = (loan: Loan) => Math.max(0, loan.total - paid(loan))
 export const progress = (loan: Loan) => Math.min(100, Math.round((paid(loan) / loan.total) * 100))
