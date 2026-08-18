@@ -27,9 +27,11 @@ export const paymentsLeft = (loan: Loan) => {
 export function schedule(loan: Loan) {
   const rows: { date: string; amount: number; after: number }[] = []
   let balance = remaining(loan)
-  const start = new Date()
-  const end = new Date(loan.dueDate)
-  const periods = loan.period === 'weekly' ? Math.max(1, Math.ceil((end.getTime() - start.getTime()) / 604800000)) : Math.max(1, (end.getFullYear() - start.getFullYear()) * 12 + end.getMonth() - start.getMonth() + 1)
+  if (balance <= 0) return rows
+  const lastPayment = loan.payments.slice().sort((a, b) => b.date.localeCompare(a.date))[0]
+  const start = new Date(`${lastPayment?.date || new Date().toISOString().slice(0, 10)}T12:00:00`)
+  const end = new Date(`${loan.dueDate}T12:00:00`)
+  const periods = loan.period === 'weekly' ? Math.max(1, Math.ceil((end.getTime() - start.getTime()) / 604800000)) : Math.max(1, (end.getFullYear() - start.getFullYear()) * 12 + end.getMonth() - start.getMonth())
   const amount = loan.payoffMode === 'fixed' ? (loan.fixedAmount || 0) : balance / periods
   for (let i = 1; i <= periods && balance > 0; i++) {
     const date = new Date(start)
@@ -41,6 +43,7 @@ export function schedule(loan: Loan) {
   }
   return rows
 }
+export const nextPayment = (loan: Loan) => schedule(loan)[0] || null
 export const formatDate = (date: string) => new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric', year: 'numeric' }).format(new Date(date + 'T12:00:00'))
 export const formatShortDate = (date: string) => new Intl.DateTimeFormat('en-US', { month: 'short', day: 'numeric' }).format(new Date(date + 'T12:00:00'))
 export const uid = () => Math.random().toString(36).slice(2, 10)
