@@ -28,15 +28,17 @@ export function schedule(loan: Loan) {
   const rows: { date: string; amount: number; after: number }[] = []
   let balance = remaining(loan)
   if (balance <= 0) return rows
+  const enteredDate = new Date(`${loan.dueDate}T12:00:00`)
   const lastPayment = loan.payments.slice().sort((a, b) => b.date.localeCompare(a.date))[0]
-  const start = new Date(`${lastPayment?.date || new Date().toISOString().slice(0, 10)}T12:00:00`)
-  const end = new Date(`${loan.dueDate}T12:00:00`)
-  const periods = loan.period === 'weekly' ? Math.max(1, Math.ceil((end.getTime() - start.getTime()) / 604800000)) : Math.max(1, (end.getFullYear() - start.getFullYear()) * 12 + end.getMonth() - start.getMonth())
+  const firstDate = lastPayment ? new Date(`${lastPayment.date}T12:00:00`) : enteredDate
+  const periods = loan.payoffMode === 'fixed' && loan.fixedAmount ? Math.max(1, Math.ceil(balance / loan.fixedAmount)) : 12
   const amount = loan.payoffMode === 'fixed' ? (loan.fixedAmount || 0) : balance / periods
-  for (let i = 1; i <= periods && balance > 0; i++) {
-    const date = new Date(start)
-    if (loan.period === 'weekly') date.setDate(date.getDate() + i * 7)
-    else date.setMonth(date.getMonth() + i)
+  for (let i = 0; i < periods && balance > 0; i++) {
+    const date = new Date(firstDate)
+    if (lastPayment || i > 0) {
+      if (loan.period === 'weekly') date.setDate(date.getDate() + (i + 1) * 7)
+      else date.setMonth(date.getMonth() + (i + 1))
+    }
     const payment = Math.min(balance, amount)
     balance -= payment
     rows.push({ date: date.toISOString().slice(0, 10), amount: payment, after: balance })
